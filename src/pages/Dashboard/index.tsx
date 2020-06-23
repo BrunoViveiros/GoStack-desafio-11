@@ -35,7 +35,6 @@ interface Food {
   price: number;
   thumbnail_url: string;
   formattedPrice: string;
-  category: number;
 }
 
 interface Category {
@@ -62,41 +61,21 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     async function loadFoods(): Promise<void> {
       // Load Foods from API
-      const { data } = await api.get<Food[]>('foods');
+      const response = await api.get<Food[]>('foods', {
+        params: {
+          category_like: selectedCategory,
+          name_like: searchValue,
+        },
+      });
 
-      const formattedFoods = data.map(item => ({
-        ...item,
-        formattedPrice: formatValue(item.price),
-      }));
+      const formattedFoods = response.data.map(food => {
+        return {
+          ...food,
+          formattedPrice: formatValue(food.price),
+        };
+      });
 
       setFoods(formattedFoods);
-
-      if (selectedCategory) {
-        const filteredFoods = formattedFoods.filter(
-          (item: Food) => item.category === selectedCategory,
-        );
-
-        setFoods(filteredFoods);
-      }
-
-      // api.get<Food[]>('foods').then(response => {
-      //   const { data } = response;
-
-      //   const formattedFoods = data.map(item => ({
-      //     ...item,
-      //     formattedPrice: formatValue(item.price),
-      //   }));
-
-      //   setFoods(formattedFoods);
-
-      //   if (selectedCategory) {
-      //     const filteredFoods = formattedFoods.filter(
-      //       (item: Food) => item.category === selectedCategory,
-      //     );
-
-      //     setFoods(filteredFoods);
-      //   }
-      // });
     }
 
     loadFoods();
