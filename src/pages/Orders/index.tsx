@@ -32,7 +32,7 @@ const Orders: React.FC = () => {
 
   useEffect(() => {
     async function loadOrders(): Promise<void> {
-      // Load orders from API
+      // TODO Load orders from API
     }
 
     loadOrders();
