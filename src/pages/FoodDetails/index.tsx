@@ -77,14 +77,9 @@ const FoodDetails: React.FC = () => {
     async function loadFood(): Promise<void> {
       // DONE Load a specific food with extras based on routeParams id
 
-      const response = await api.get<Food>(`foods/${routeParams.id}`);
-      // const [firstResponse, secondResponse] = await Promise.all([
-      //   api.get<Food>(`foods/${routeParams.id}`),
-      //   api.get<Food[]>('favorites'),
-      // ]);
-
-      const selectedFood = response.data;
-      // const allFavorites = secondResponse.data;
+      const { data: selectedFood } = await api.get<Food>(
+        `foods/${routeParams.id}`,
+      );
 
       const formmatedExtras = selectedFood.extras.map(extra => ({
         ...extra,
@@ -99,14 +94,6 @@ const FoodDetails: React.FC = () => {
 
       setExtras(formattedFood.extras);
       setFood(formattedFood);
-
-      // if (allFavorites.length) {
-      //   const favorite = allFavorites.filter(item => {
-      //     return item.id === routeParams.id;
-      //   });
-
-      //   setIsFavorite(!!favorite.length);
-      // }
     }
 
     loadFood();
@@ -114,9 +101,7 @@ const FoodDetails: React.FC = () => {
 
   useEffect(() => {
     async function loadFavorite(): Promise<void> {
-      const response = await api.get<Food[]>('favorites');
-
-      const allFavorites = response.data;
+      const { data: allFavorites } = await api.get<Food[]>('favorites');
 
       if (allFavorites.length) {
         const favorite = allFavorites.filter(item => {
@@ -231,6 +216,31 @@ const FoodDetails: React.FC = () => {
 
   async function handleFinishOrder(): Promise<void> {
     // TODO Finish the order and save on the API
+    const {
+      id: product_id,
+      name,
+      description,
+      price,
+      category,
+      thumbnail_url,
+    } = food;
+
+    const priceWithoutSimbols = String(cartTotal)
+      .replace('R$', '')
+      .replace(',', '.');
+    const formmatedPrice = Number(priceWithoutSimbols);
+
+    await api.post('orders', {
+      product_id,
+      name,
+      description,
+      price: formmatedPrice,
+      category,
+      thumbnail_url,
+      extras,
+    });
+
+    navigation.navigate('Orders');
   }
 
   // Calculate the correct icon name
